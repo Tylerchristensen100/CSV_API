@@ -1,0 +1,106 @@
+openapi: "3.0.3"
+info:
+  title: CSV API
+  description: "API to return data from a CSV file."
+  contact:
+    name: Tyler Christensen
+    url: https://freethegnomes.org
+    email: tylerchristensen100@gmail.com
+  version: "{{.Version}}"
+
+servers:
+  - url: http://localhost:4000
+
+paths:
+  /:
+    get:
+      summary: Get CSV Data in JSON format
+      description: Converts any CSV into a JSON format, allowing for sorting and filtering of the data.
+      parameters:
+        - name: url
+          in: query
+          required: false
+          description: "URL of the CSV file to fetch. "
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          required: false
+          description: "Sort by a specific header in the CSV file, if not provided, the default will be the first header in the CSV."
+          schema:
+            type: string
+        - name: filterBy
+          in: query
+          required: false
+          description: "Filter the CSV data by a specific header and value. Format: `header==value`."
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: ok
+          $ref: "#/components/responses/DefaultHeaders"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    description: "The key being sorted by"
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        header1:
+                          type: string
+                          description: "The first header in the CSV file"
+                        header2:
+                          type: string
+                          description: "The second header in the CSV file"
+                        "...":
+                          type: string
+                          description: "Additional headers in the CSV file"
+                      description: "The CSV data sorted by the specified key"
+        "400":
+          description: "Bad request"
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          description: "Internal server error"
+          $ref: "#/components/responses/ErrorResponse"
+components:
+  responses:
+    ErrorResponse:
+      description: "Error"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                description: The HTTP Status Code
+                example: 400
+              message:
+                type: string
+                description: "Error message describing the issue with the request"
+                example: "Invalid URL provided"
+    DefaultHeaders:
+      description: "Default headers for all responses"
+      headers:
+        Content-Type:
+          description: "The content type of the response"
+          schema:
+            type: string
+            example: "application/json"
+        X-Processing-Time:
+          description: "The time it took for the server to process the request"
+          schema:
+            type: string
+            example: 3.7 milliseconds
+        Content-Length:
+          description: "The length of the response content"
+          schema:
+            type: integer
+            example: 29915
