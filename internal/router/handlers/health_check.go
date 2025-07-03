@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"runtime"
 	"time"
 
 	"org.freethegnomes.csv_api/internal"
@@ -18,9 +19,20 @@ func HealthCheck(app *internal.Application) http.HandlerFunc {
 		minutes := int(duration.Minutes()) % 60
 		seconds := int(duration.Seconds()) % 60
 
+		runtime.GC()
+
+		var memStats runtime.MemStats
+		runtime.ReadMemStats(&memStats)
+
 		status := map[string]interface{}{
 			"status": "ok",
 			"uptime": fmt.Sprintf("%d hours, %d minutes, %d seconds", hours, minutes, seconds),
+			"memory": map[string]interface{}{
+				"heapAlloc": fmt.Sprintf("%d KB", memStats.Alloc/1024), // bytes allocated and still in use
+				"numGC":     memStats.NumGC,
+			},
+			"goRoutines": runtime.NumGoroutine(),
+			"goVersion":  runtime.Version(),
 		}
 
 		data, err := json.Marshal(status)
