@@ -18,6 +18,7 @@ func CreateRouter(app *internal.Application) http.Handler {
 
 	server.HandleFunc("GET "+helpers.DocsRoute, documentation.Page)
 	server.HandleFunc("GET "+helpers.DocsRoute+"/config", documentation.Config)
+	server.HandleFunc("GET /info", docs.README)
 
 	server.HandleFunc("GET /healthz", handlers.HealthCheck(app))
 	server.Handle("GET /server-status", expvar.Handler())
