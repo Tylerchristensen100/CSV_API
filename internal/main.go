@@ -1,17 +1,11 @@
 package internal
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
-	"net/http/fcgi"
-	"os"
-	"os/signal"
-	"strings"
-	"syscall"
 	"time"
 )
 
@@ -23,11 +17,7 @@ type Configuration struct {
 type ServerConfig struct {
 	Address        string   `yaml:"host"`
 	Port           int      `yaml:"port"`
-	Protocol       string   `yaml:"protocol"`
-	BaseUrl        string   `yaml:"baseUrl"`
-	Environment    string   `yaml:"env"`
 	TrustedOrigins []string `yaml:"trustedOrigins"`
-	CSVPath        string   `yaml:"csvPath"`
 }
 
 type Secrets struct {
@@ -53,44 +43,17 @@ func (app *Application) Serve() error {
 		ErrorLog: slog.NewLogLogger(app.Log.Handler(), slog.LevelError),
 	}
 
-	shutdownError := make(chan error)
-
-	go func() {
-		shutdownSignalListener := make(chan os.Signal, 1)
-		signal.Notify(shutdownSignalListener, syscall.SIGINT, syscall.SIGTERM)
-
-		signalReader := <-shutdownSignalListener
-
-		app.Log.Info("Shutting Down Go Server", slog.String("signal", signalReader.String()))
-
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		err := server.Shutdown(ctx)
-		if err != nil {
-			shutdownError <- err
-		}
-		shutdownError <- nil
-	}()
-
 	listener, err := net.Listen("tcp", server.Addr)
 	if err != nil {
-		app.Log.Error("internal/Serve: Failed to Start Go Server. Could not make TCP connection", slog.String("location", server.Addr), slog.String("protocol", app.Config.ServerConfig.Protocol))
+		app.Log.Error("internal/Serve: Failed to Start Go Server. Could not make TCP connection", slog.String("location", server.Addr))
 		return err
 	}
 
-	app.Log.Info(fmt.Sprintf("Starting %s Go Server", strings.ToUpper(app.Config.ServerConfig.Protocol)), slog.String("location", server.Addr+app.Config.ServerConfig.BaseUrl))
-	if app.Config.ServerConfig.Protocol == "fcgi" {
-		err = fcgi.Serve(listener, server.Handler)
-	} else {
-		err = server.Serve(listener)
-	}
+	app.Log.Info(fmt.Sprintf("Starting Go Server on %d", app.Config.ServerConfig.Port))
+
+	err = server.Serve(listener)
+
 	if !errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-
-	err = <-shutdownError
-	if err != nil {
 		return err
 	}
 

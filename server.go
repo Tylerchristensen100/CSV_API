@@ -11,7 +11,7 @@ import (
 	"org.freethegnomes.csv_api/internal/router"
 )
 
-const configPath = "etc/conf.d/config.yaml"
+const configPath = "etc/.conf/config.yaml"
 
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))

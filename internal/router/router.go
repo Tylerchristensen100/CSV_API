@@ -31,9 +31,7 @@ func CreateRouter(app *internal.Application) http.Handler {
 }
 
 func createMiddlewareStack(app *internal.Application, server http.Handler) http.Handler {
-	return middleware.PanicRecovery(app,
-		middleware.RequestLogging(app,
-			middleware.HandleBaseUrl(app,
-				middleware.ApplyBaseHeaders(app,
-					server))))
+	return middleware.RequestLogging(app,
+		middleware.ApplyHeaders(app,
+			server))
 }

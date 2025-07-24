@@ -28,7 +28,7 @@ func HealthCheck(app *internal.Application) http.HandlerFunc {
 			"status": "ok",
 			"uptime": fmt.Sprintf("%d hours, %d minutes, %d seconds", hours, minutes, seconds),
 			"memory": map[string]interface{}{
-				"heapAlloc": fmt.Sprintf("%d KB", memStats.Alloc/1024), // bytes allocated and still in use
+				"heapAlloc": fmt.Sprintf("%d KB", memStats.Alloc/1024),
 				"numGC":     memStats.NumGC,
 			},
 			"goRoutines": runtime.NumGoroutine(),

@@ -6,10 +6,11 @@ info:
     name: Tyler Christensen
     url: https://freethegnomes.org
     email: tylerchristensen100@gmail.com
-  version: "{{.Version}}"
+  version: "1.0.0"
 
 servers:
   - url: http://localhost:4000
+  - url: https://csv.freethegnomes.org/
 
 paths:
   /:

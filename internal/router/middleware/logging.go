@@ -73,7 +73,6 @@ func RequestLogging(app *internal.Application, next http.Handler) http.Handler {
 		app.Log.Info(fmt.Sprintf("%s Request Received", req.Method),
 			slog.String("method", req.Method),
 			slog.String("path", req.URL.Path),
-			slog.String("protocol", req.Proto),
 			slog.String("status", statusCode),
 			slog.String("client_ip", req.RemoteAddr),
 			slog.String("user_agent", req.UserAgent()),
